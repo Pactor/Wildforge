@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#75b7e8" />
+    <title>Wildforge</title>
+    <script>
+      // The game owns secondary-click input. Install this before the module graph
+      // so embedded browsers cannot open their navigation menu during startup.
+      window.addEventListener('contextmenu', function (event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }, true);
+      window.oncontextmenu = function () { return false; };
+    </script>
+  </head>
+  <body oncontextmenu="return false">
+    <div id="game"></div>
+    <div id="hud">
+      <div id="crosshair" aria-hidden="true"></div>
+      <div id="target-label" class="hidden" aria-live="polite"><strong id="target-name"></strong><small id="target-detail"></small></div>
+      <div id="build-hint" class="hidden" aria-live="polite"></div>
+      <div id="attack-meter" aria-label="Attack readiness"><span></span></div>
+      <div id="block-status" class="hidden" aria-label="Shield raised">SHIELD RAISED</div>
+      <div id="boss-hud" class="hidden"><strong id="boss-name">HOLLOW WARDEN</strong><div><i id="boss-health"></i></div><span id="boss-phase"></span></div>
+      <div id="navigation-hud" class="hidden" aria-live="polite"><div><span id="navigation-kind">WAYFINDER</span><strong id="navigation-target">WORLD ORIGIN</strong></div><div class="navigation-bearing"><i id="navigation-needle">▲</i><b id="navigation-direction">N</b><span id="navigation-distance">0m</span></div><small>RIGHT-CLICK CYCLE · SHIFT-RIGHT-CLICK TRAILMARK</small></div>
+      <div id="debug"></div>
+      <div id="playtest-badge" class="hidden" aria-label="Playtest mode active">PLAYTEST MODE · 25% DAMAGE · 10% EXHAUSTION</div>
+      <div id="quick-help">E INVENTORY · ESC PAUSE<span> · F8 MARK PROBLEM</span></div>
+      <div id="effects-hud" aria-label="Active status effects"></div>
+      <div id="climate-hud" class="hidden" aria-label="Climate exposure"><strong id="climate-label">CLIMATE</strong><div><i id="climate-fill"></i></div><small>SEEK SHELTER OR CLIMATE RELIEF</small></div>
+      <div id="survival-hud">
+        <div id="health" class="meter" aria-label="Health"></div>
+        <div id="hunger" class="meter" aria-label="Hunger"></div>
+        <div id="air" class="meter hidden" aria-label="Air"></div>
+        <div id="armor" class="meter hidden" aria-label="Armor"></div>
+      </div>
+      <div id="experience-hud" aria-label="Experience"><span id="experience-level">0</span><div><i id="experience-fill"></i></div></div>
+      <div id="toast" role="status"></div>
+      <div id="sound-caption" role="status" aria-live="polite"></div>
+      <div id="hotbar" aria-label="Hotbar"></div>
+    </div>
+    <div id="menu">
+      <div class="panel">
+        <div class="eyebrow">A VOXEL SURVIVAL WORLD</div>
+        <h1>WILDFORGE</h1>
+        <p>Explore a living block world. Shape it one cube at a time.</p>
+        <div id="playtest-menu-note" class="playtest-menu-note hidden">PLAYTEST SAVE · BOOSTED SURVIVAL · KIT REFILLS ON LOAD</div>
+        <button id="play">ENTER WORLD</button>
+        <button id="new-world" class="secondary">NEW SEED</button>
+        <button id="open-settings" class="secondary">SETTINGS</button>
+        <div class="controls">WASD move/steer · Cart W accelerate/S brake · Space jump/mount leap · Shift sprint/dismount · C/Ctrl sneak · F raise shield · R rotate build · E inventory · M Trailchart · Esc pause<br />Left click mine/attack/recover vehicle · Hold left to charge bow · Right click use/place/cast/board/reel/tame/ride/couple/ignite · Desert heat: seek shade/water or Cinderward · Frostveil cold: shelter near fire or wear Tough Hide · Rams push lines up to 12 blocks · Binding Ram: releasing Spark power pulls the nearest block back · Spark Inverter: rear input becomes the delayed opposite signal at its front · Spark Comparator: reads rear/container level 0–15; use toggles Compare/Subtract · Change Sentry: click the face to watch; block changes pulse Spark power from its rear · Rune Dispenser: pulse with Spark power to shoot Arrows, pour pails, prime Kegs, or ignite with a Striker · Forge Ejector: click a face to aim, then pulse with Spark power · Forge Funnel: click a container face to aim its automatic output · Hearthsong Player: hold Songstone to insert, use to eject, Shift-use pause/resume · Waystar: use cycles unlocked aura, Shift-use inspects pyramid · Resonance Box: use to tune, Shift-use to replay · Forgebrand Torches mount on floors or walls · Trailbarrel: compact 27-slot storage · Hearthcake: place, then use for seven servings · Glass Panes/Forged Lattice connect automatically · Wayvault Chest: shared personal storage · Forge Kiln: fast minerals · Hearth Smoker: fast food · Stonewright Cutter: efficient masonry variants · Runegrind Wheel: remove runes and reclaim XP · Forgeheart Anvil: Iron → Emberite → Voidglass · Infusion Still: load flasks, reagents, and Lumen Spores · Trail Tether: right-click animal, then fence · Raincatch Basin: use pails or dyed Mossweave · Archive Shelves: build two blocks from a Runeforge with an open air gap · Spark Striker lights Emberfire and Blast Kegs · 1–9 select</div>
+      </div>
+    </div>
+    <div id="settings-screen" class="screen hidden">
+      <div class="settings-panel">
+        <div class="inventory-heading"><div><span class="eyebrow">TUNE YOUR EXPEDITION</span><h2>Settings</h2></div><button id="close-settings" class="square-button" aria-label="Close settings">×</button></div>
+        <div class="settings-list">
+          <label><span><strong>Performance Mode</strong><output id="performance-mode-value"></output></span><select id="performance-mode-setting"><option value="adaptive">Adaptive</option><option value="performance">Performance</option><option value="balanced">Balanced</option><option value="quality">Quality</option><option value="custom">Custom</option></select></label>
+          <label><span><strong>Mouse Sensitivity</strong><output id="sensitivity-value"></output></span><input id="sensitivity-setting" type="range" min="0.25" max="2.5" step="0.05" /></label>
+          <label><span><strong>Field of View</strong><output id="fov-value"></output></span><input id="fov-setting" type="range" min="55" max="105" step="1" /></label>
+          <label><span><strong>View Distance</strong><output id="view-distance-value"></output></span><input id="view-distance-setting" type="range" min="1" max="4" step="1" /></label>
+          <label><span><strong>Render Scale</strong><output id="render-scale-value"></output></span><input id="render-scale-setting" type="range" min="0.5" max="1.5" step="0.1" /></label>
+          <label><span><strong>Master Volume</strong><output id="volume-value"></output></span><input id="volume-setting" type="range" min="0" max="1" step="0.05" /></label>
+          <label><span><strong>Music Volume</strong><output id="music-volume-value"></output></span><input id="music-volume-setting" type="range" min="0" max="1" step="0.05" /></label>
+          <label><span><strong>World Brightness</strong><output id="brightness-value"></output></span><input id="brightness-setting" type="range" min="0.7" max="1.35" step="0.05" /></label>
+          <label><span><strong>Crosshair Size</strong><output id="crosshair-size-value"></output></span><input id="crosshair-size-setting" type="range" min="0.75" max="2" step="0.05" /></label>
+          <label><span><strong>HUD Text Scale</strong><output id="text-scale-value"></output></span><input id="text-scale-setting" type="range" min="0.9" max="1.35" step="0.05" /></label>
+          <label class="toggle-setting"><span><strong>Reduced Motion</strong><output id="reduced-motion-value"></output></span><input id="reduced-motion-setting" type="checkbox" /></label>
+          <label class="toggle-setting"><span><strong>Reduce Lightning Flashes</strong><output id="reduce-flashes-value"></output></span><input id="reduce-flashes-setting" type="checkbox" /></label>
+          <label class="toggle-setting"><span><strong>High-Contrast HUD</strong><output id="high-contrast-value"></output></span><input id="high-contrast-setting" type="checkbox" /></label>
+          <label class="toggle-setting"><span><strong>Directional Sound Captions</strong><output id="sound-captions-value"></output></span><input id="sound-captions-setting" type="checkbox" /></label>
+        </div>
+        <button id="reset-settings" class="secondary">RESET DEFAULTS</button>
+        <section class="save-management" aria-labelledby="save-management-title">
+          <div><h3 id="save-management-title">World Backup</h3><p>Export or restore this seed’s complete player state and edited blocks.</p></div>
+          <div class="save-actions"><button id="export-world" class="secondary">EXPORT WORLD</button><button id="import-world" class="secondary">IMPORT WORLD</button></div>
+          <input id="import-world-file" type="file" accept="application/json,.json" hidden />
+        </section>
+        <div class="settings-note">Changes apply immediately and are saved for every Wildforge world. Manual View Distance or Render Scale changes switch the performance mode to Custom.</div>
+      </div>
+    </div>
+    <div id="inventory-screen" class="screen hidden">
+      <div class="inventory-panel">
+        <div class="inventory-heading"><div><span class="eyebrow">SURVIVAL PACK</span><h2>Inventory & Crafting</h2></div><button id="close-inventory" class="square-button" aria-label="Close inventory">×</button></div>
+        <div class="inventory-columns">
+          <section><h3>Equipped Gear</h3><div id="equipment-list" class="equipment-list"></div><h3>Carried Items</h3><div id="inventory-list" class="item-grid"></div></section>
+          <section><h3 id="crafting-mode-label">Hand Crafting</h3><div id="recipe-list" class="recipe-list"></div></section>
+        </div>
+        <div class="inventory-tip">Press E to return to the world</div>
+      </div>
+    </div>
+    <div id="map-screen" class="screen hidden">
+      <div class="map-panel">
+        <div class="inventory-heading"><div><span class="eyebrow">YOUR WALKED WORLD</span><h2>Explored Trailchart</h2></div><button id="close-map" class="square-button" aria-label="Close map">×</button></div>
+        <canvas id="trailchart-canvas" width="560" height="560" aria-label="Explored world map"></canvas>
+        <div class="map-legend"><span><i class="player-mark"></i>YOU</span><span><i class="trail-mark"></i>TRAILMARK</span><span><i class="landmark-mark"></i>LANDMARK</span><span>DARK = UNEXPLORED</span></div>
+        <div class="settings-note">Carry the Trailchart while exploring to record nearby terrain · M or Esc closes</div>
+      </div>
+    </div>
+    <div id="death-screen" class="screen hidden">
+      <div class="death-panel"><div class="eyebrow">THE WILD CLAIMED YOU</div><h2>You Died</h2><p id="death-loss" class="settings-note">Your carried items remain where you fell for five minutes.</p><button id="respawn">RESPAWN</button></div>
+    </div>
+    <div id="sign-screen" class="screen hidden">
+      <div class="sign-panel">
+        <span class="eyebrow">LEAVE YOUR MARK</span><h2>Edit Sign</h2>
+        <textarea id="sign-text" rows="4" maxlength="75" spellcheck="false" aria-label="Sign text" placeholder="Up to four lines"></textarea>
+        <div class="sign-actions"><button id="save-sign">SAVE SIGN</button><button id="cancel-sign" class="secondary">CANCEL</button></div>
+        <div class="settings-note">Four lines · 18 characters per line</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
